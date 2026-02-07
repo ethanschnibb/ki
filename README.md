@@ -73,5 +73,3 @@ mvn test
 #### Notes
 
 The code base has been written to compile under Java 8 and upwards. Dependencies are managed via Maven, see the `pom.xml` file.
-
-# ki
