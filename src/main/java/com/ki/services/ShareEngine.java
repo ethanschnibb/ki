@@ -24,7 +24,7 @@ public class ShareEngine {
 
             int totalShares = 0;
             for (Payment payment : customerPayments) {
-                int shares = new BigDecimal(payment.getAmount()).divide(sharePrice).intValue();
+                int shares = new BigDecimal(payment.getAmount()).divideToIntegralValue(sharePrice).intValue();
                 totalShares += shares;
             }
 
