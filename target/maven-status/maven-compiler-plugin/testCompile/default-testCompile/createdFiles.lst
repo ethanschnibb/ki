@@ -1,0 +1,5 @@
+com/ki/services/PaymentProcessorTest.class
+com/ki/models/PaymentTest.class
+com/ki/Fixture.class
+com/ki/IntegrationTest.class
+com/ki/services/ShareEngineTest.class
