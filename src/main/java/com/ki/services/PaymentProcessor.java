@@ -3,34 +3,82 @@ package com.ki.services;
 import com.ki.models.Payment;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.ki.services.adapters.PaymentAdapter;
+import com.ki.services.adapters.CardPaymentAdapter;
+import com.ki.services.adapters.BankPaymentAdapter;
+import com.ki.services.PaymentSource;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.function.Function;
 
+/**
+ * PaymentProcessor is responsible for:
+ *
+ * 1) Loading payment records from a CSV file
+ * 2) Validating input structure based on payment source
+ * 3) Delegating parsing logic to a PaymentAdapter strategy
+ * 4) Returning domain Payment objects for further processing
+ *
+ * Design notes:
+ * - Adapter pattern isolates CSV format differences between sources.
+ * - Enum PaymentSource prevents stringly-typed logic.
+ * - Public API remains unchanged to preserve compatibility with upstream platform modules.
+ */
 public class PaymentProcessor {
 
+    /**
+     * Entry point for loading payments.
+     *
+     * @param csvPath path to CSV input file
+     * @param source payment source ("card", "bank") — converted internally to enum
+     *
+     * Responsibilities:
+     * - Validate source input
+     * - Validate CSV header structure
+     * - Select appropriate parsing strategy
+     * - Delegate file processing
+     */
     public Payment[] getPayments(String csvPath, String source) {
 
+        // Convert external string input into domain-safe enum
+        PaymentSource paymentSource = PaymentSource.fromString(source);
+
+        // Validate CSV structure early to fail fast before processing entire file
         try {
-            validateCsvHeader(csvPath, source);
+            validateCsvHeader(csvPath, paymentSource);
         } catch (IOException e) {
             throw new RuntimeException("Failed to validate CSV file: ", e);
         }
 
-        if ("card".equalsIgnoreCase(source)) {
-            return parsePayments(csvPath, line -> line);
-        } else if ("bank".equalsIgnoreCase(source)) {
-            return parsePayments(csvPath, line -> adaptBankLine(line));
-        } else {
-            throw new IllegalArgumentException("Unsupported payment source: " + source);
+        // Strategy selection:
+        // Adapter encapsulates source-specific parsing rules.
+        PaymentAdapter adapter;
+
+        switch (paymentSource) {
+            case CARD:
+                adapter = new CardPaymentAdapter();
+                break;
+            case BANK:
+                adapter = new BankPaymentAdapter();
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported source");
         }
+    
+        // Stream CSV rows and convert into Payment domain objects
+        return parsePayments(csvPath, adapter);
     }
 
-    // Functional interface allows us to reuse the same parsing logic for both card and bank payments, just with different adapters for the CSV format
-    // Takes a String[] as input and returns String[]
-    private Payment[] parsePayments(String csvPath, Function<String[], String[]> adapter) {
+    /**
+     * Reads CSV file line-by-line and converts rows into Payment objects.
+     *
+     * Design notes:
+     * - Streaming approach avoids loading entire CSV into memory.
+     * - Adapter abstracts differences in CSV structure.
+     * - Try-with-resources ensures file handles are closed safely.
+     */
+    private Payment[] parsePayments(String csvPath, PaymentAdapter adapter) {
 
         ArrayList<Payment> payments = new ArrayList<>();
 
@@ -38,55 +86,73 @@ public class PaymentProcessor {
              CSVReader reader = new CSVReaderBuilder(file).withSkipLines(1).build()) {
 
             String[] line;
-
+            
+            // Process each row sequentially
             while ((line = reader.readNext()) != null) {
 
-                String[] adaptedLine = adapter.apply(line);
-
-                Payment payment = new Payment(adaptedLine);
+                // Adapter converts raw CSV fields into domain Payment object
+                Payment payment = adapter.adapt(line);
                 payments.add(payment);
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            // NOTE: production code should use structured logging rather than printStackTrace
+            // e.printStackTrace();
+            throw new RuntimeException(
+                "Failed to parse payments from CSV file: " + csvPath,
+                e
+            );
         }
 
         return payments.toArray(new Payment[0]);
     }
 
-    private String[] adaptBankLine(String[] line) {
+    /**
+     * Validates CSV header structure before processing.
+     *
+     * This prevents:
+     * - mismatched CSV files
+     * - incorrect source selection
+     * - downstream parsing errors
+     *
+     * Fail-fast validation improves debuggability.
+     */
+    private void validateCsvHeader(String csvPath, PaymentSource source) throws IOException {
 
-        // bank CSV format is different from card CSV format, need to adapt it to reuse the same Payment method:
-        // customer_id,date,amount,bank_account_id
-
-        return new String[]{
-                line[0],    // customer_id
-                line[1],    // date
-                line[2],    // amount
-                line[3],    // bank_account_id (reusing card_id position)
-                "processed" // assume bank transfers always successful - allows us to reuse verification logic from cards
-        };
-    }
-
-    private void validateCsvHeader(String csvPath, String source) throws IOException {
         try (CSVReader reader = new CSVReaderBuilder(new FileReader(csvPath)).build()) {
             String[] header = reader.readNext();
+    
             if (header == null) {
                 throw new IllegalArgumentException("CSV file is empty: " + csvPath);
             }
     
-            if ("card".equalsIgnoreCase(source)) {
-                if (header.length < 5 || !header[3].equalsIgnoreCase("card_id")) {
-                    throw new IllegalArgumentException("CSV does not match expected card format.");
-                }
-            } else if ("bank".equalsIgnoreCase(source)) {
-                if (header.length < 4 || !header[3].equalsIgnoreCase("bank_account_id")) {
-                    throw new IllegalArgumentException("CSV does not match expected bank format.");
-                }
+            switch (source) {
+                // Card CSV expected format:
+                // customer_id,date,amount,card_id,card_status
+                case CARD:
+                    if (header.length < 5 || !header[3].equalsIgnoreCase("card_id")) {
+                        throw new IllegalArgumentException("CSV does not match expected card format.");
+                    }
+                    break;
+                    
+                // Bank CSV expected format:
+                // customer_id,date,amount,bank_account_id
+                case BANK:
+                    if (header.length < 4 || !header[3].equalsIgnoreCase("bank_account_id")) {
+                        throw new IllegalArgumentException("CSV does not match expected bank format.");
+                    }
+                    break;
             }
         }
     }
 
+    /**
+     * Filters payments to include only successful transactions.
+     *
+     * Note:
+     * - Business rule encapsulated here rather than parsing stage.
+     * - Keeps parsing logic pure and separation of concerns clear.
+     */
     public Payment[] verifyPayments(Payment[] payments) {
 
         ArrayList<Payment> filtered = new ArrayList<>();
