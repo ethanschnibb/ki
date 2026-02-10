@@ -149,4 +149,20 @@ public class PaymentProcessorTest {
         }
     }
 
+    @Test
+    public void shouldThrowRuntimeExceptionWhenCsvCannotBeRead() {
+
+        PaymentProcessor processor = new PaymentProcessor();
+
+        String invalidPath = "non-existent-file.csv";
+
+        RuntimeException ex = assertThrows(
+            RuntimeException.class,
+            () -> processor.getPayments(invalidPath, "card")
+        );
+
+        assertTrue(ex.getMessage().contains("Failed to validate CSV file"));
+
+        assertNotNull(ex.getCause());
+    }
 }
