@@ -161,7 +161,9 @@ public class PaymentProcessorTest {
             () -> processor.getPayments(invalidPath, "card")
         );
 
-        assertTrue(ex.getMessage().contains("Failed to validate CSV file"));
+        assertTrue(
+            ex.getMessage().contains("Failed to parse payments from CSV file")
+        );
 
         assertNotNull(ex.getCause());
     }

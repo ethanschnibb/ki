@@ -9,9 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ShareEngine {
 
+    private static final Logger logger = LoggerFactory.getLogger(ShareEngine.class);
+    
     public ShareOrder[] generateShareOrders(BigDecimal sharePrice, Payment[] payments) {
+        logger.info("Generating share orders for {} payments at share price {}", payments.length, sharePrice);
 
         ArrayList<ShareOrder> shareOrders = new ArrayList<>();
 
@@ -35,6 +41,7 @@ public class ShareEngine {
 
         }
 
+        logger.info("Finished generating {} share orders", shareOrders.size());
         return shareOrders.toArray(new ShareOrder[shareOrders.size()]);
     }
 

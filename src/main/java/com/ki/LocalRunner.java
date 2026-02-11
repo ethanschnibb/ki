@@ -16,9 +16,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LocalRunner {
 
+    private static final Logger logger = LoggerFactory.getLogger(LocalRunner.class);
+
     public static String simulatePlatform(String csvPath, String source, BigDecimal sharePrice) {
+        logger.info("Starting simulation with csvPath={}, source={}, sharePrice={}", csvPath, source, sharePrice);
 
         String[] fieldNames = new String[]{
                 "customer_id",
@@ -41,6 +47,7 @@ public class LocalRunner {
             });
         }
 
+        logger.info("Simulation completed successfully");
         return generateCsv(fieldNames, data);
     }
 
@@ -54,6 +61,7 @@ public class LocalRunner {
         try {
             ns = parser.parseArgs(args);
         } catch (ArgumentParserException e) {
+            logger.error("Failed to parse arguments: {}", e.getMessage());
             parser.handleError(e);
             System.exit(1);
         }
@@ -70,6 +78,7 @@ public class LocalRunner {
         try {
             writer.close();
         } catch (IOException e) {
+            logger.error("Failed to generate CSV output: {}", e.getMessage());
             e.printStackTrace();
         }
         return output.toString();
