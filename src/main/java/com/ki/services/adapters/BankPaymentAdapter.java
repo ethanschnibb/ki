@@ -1,5 +1,6 @@
 package com.ki.services.adapters;
 
+import com.ki.models.Bank;
 import com.ki.models.Payment;
 
 /**
@@ -35,6 +36,6 @@ public class BankPaymentAdapter implements PaymentAdapter {
             "processed" // business rule: bank transfers always successful
         };
 
-        return new Payment(adaptedLine);
+        return new Bank(adaptedLine);
     }
 }

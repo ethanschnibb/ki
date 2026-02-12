@@ -3,5 +3,10 @@
 /Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/services/PaymentProcessor.java
 /Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/models/ShareOrder.java
 /Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/models/Card.java
+/Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/services/adapters/BankPaymentAdapter.java
 /Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/LocalRunner.java
 /Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/services/ShareEngine.java
+/Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/models/Bank.java
+/Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/services/adapters/CardPaymentAdapter.java
+/Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/services/adapters/PaymentAdapter.java
+/Users/ethansmith/Desktop/KI/Ki-Takehome/ki-takehome-java/src/main/java/com/ki/services/PaymentSource.java

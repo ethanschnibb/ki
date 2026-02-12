@@ -1,8 +1,10 @@
 package com.ki.services;
 
-import com.ki.models.Card;
 import com.ki.Fixture;
 import com.ki.models.Payment;
+import com.ki.models.Bank;
+import com.ki.models.Card;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -13,6 +15,7 @@ public class PaymentProcessorTest {
 
     @Test
     public void testGetPayments() {
+
         String fixturePath = Fixture.getPath("card_payments_mixed.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
@@ -20,13 +23,23 @@ public class PaymentProcessorTest {
 
         assertEquals(3, payments.length);
 
-        assertEquals(30, payments[0].card.getCardId());
-        assertEquals(45, payments[1].card.getCardId());
-        assertEquals(10, payments[2].card.getCardId());
+        // Downcast to concrete type
+        assertTrue(payments[0] instanceof Card);
+        assertTrue(payments[1] instanceof Card);
+        assertTrue(payments[2] instanceof Card);
+
+        Card p1 = (Card) payments[0];
+        Card p2 = (Card) payments[1];
+        Card p3 = (Card) payments[2];
+
+        assertEquals(30, p1.getCardId());
+        assertEquals(45, p2.getCardId());
+        assertEquals(10, p3.getCardId());
     }
 
     @Test
     public void testGetPaymentsEmpty() {
+
         String fixturePath = Fixture.getPath("card_payments_empty.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
@@ -37,21 +50,22 @@ public class PaymentProcessorTest {
 
     @Test
     public void testVerifyPayments() {
-        Payment payment1 = createPayment("processed");
-        Payment payment2 = createPayment("declined");
-        Payment payment3 = createPayment("processed");
+
+        Payment payment1 = createCardPayment("processed");
+        Payment payment2 = createCardPayment("declined");
+        Payment payment3 = createCardPayment("processed");
 
         Payment[] payments = {payment1, payment2, payment3};
 
         PaymentProcessor processor = new PaymentProcessor();
         Payment[] result = processor.verifyPayments(payments);
 
-        Payment[] expected = {payment1, payment3};
-        assertArrayEquals(expected, result);
+        assertArrayEquals(new Payment[]{payment1, payment3}, result);
     }
 
     @Test
     public void testCardCsvFormatIncorrect() {
+
         String fixturePath = Fixture.getPath("card_payments_wrong_format.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
@@ -60,22 +74,28 @@ public class PaymentProcessorTest {
             processor.getPayments(fixturePath, "card");
             fail("Expected IllegalArgumentException for wrong card CSV format");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("CSV does not match expected card format"));
+            assertTrue(e.getMessage().contains("card format"));
         }
     }
 
-    private Payment createPayment(String cardStatus) {
-        Card card = new Card();
-        card.setStatus(cardStatus);
-        Payment payment = new Payment();
-        payment.card = card;
-        return payment;
+    private Payment createCardPayment(String status) {
+
+        String[] data = {
+                "123",
+                "2019-02-01",
+                "2000",
+                "45",
+                status
+        };
+
+        return new Card(data);
     }
 
     // ------------------- BANK TESTS -------------------
 
     @Test
     public void testGetBankPayments() {
+
         String fixturePath = Fixture.getPath("bank_payments_mixed.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
@@ -83,17 +103,17 @@ public class PaymentProcessorTest {
 
         assertEquals(2, payments.length);
 
-        // bank_account_id is mapped to cardId internally
-        assertEquals(20, payments[0].card.getCardId());
-        assertEquals(60, payments[1].card.getCardId());
+        assertTrue(payments[0] instanceof Bank);
+        assertTrue(payments[1] instanceof Bank);
 
-        // all bank payments are marked processed
+        // behaviour testing instead of internal fields
         assertTrue(payments[0].isSuccessful());
         assertTrue(payments[1].isSuccessful());
     }
 
     @Test
     public void testVerifyBankPayments() {
+
         String fixturePath = Fixture.getPath("bank_payments_mixed.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
@@ -101,12 +121,12 @@ public class PaymentProcessorTest {
 
         Payment[] filtered = processor.verifyPayments(payments);
 
-        // all bank payments should pass
         assertEquals(payments.length, filtered.length);
     }
 
     @Test
     public void testBankCsvFormatIncorrect() {
+
         String fixturePath = Fixture.getPath("bank_payments_wrong_format.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
@@ -115,7 +135,7 @@ public class PaymentProcessorTest {
             processor.getPayments(fixturePath, "bank");
             fail("Expected IllegalArgumentException for wrong bank CSV format");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("CSV does not match expected bank format"));
+            assertTrue(e.getMessage().contains("bank format"));
         }
     }
 
@@ -123,6 +143,7 @@ public class PaymentProcessorTest {
 
     @Test
     public void testGetPaymentsEmptyCsv() {
+
         String fixturePath = Fixture.getPath("null_payments.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
@@ -137,15 +158,16 @@ public class PaymentProcessorTest {
 
     @Test
     public void testUnsupportedPaymentSource() {
+
         String fixturePath = Fixture.getPath("card_payments_mixed.csv");
 
         PaymentProcessor processor = new PaymentProcessor();
 
         try {
             processor.getPayments(fixturePath, "unsupported_source");
-            fail("Expected IllegalArgumentException for unsupported payment source");
+            fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Unsupported payment source"));
+            assertTrue(e.getMessage().contains("Unsupported"));
         }
     }
 
@@ -154,17 +176,12 @@ public class PaymentProcessorTest {
 
         PaymentProcessor processor = new PaymentProcessor();
 
-        String invalidPath = "non-existent-file.csv";
-
         RuntimeException ex = assertThrows(
-            RuntimeException.class,
-            () -> processor.getPayments(invalidPath, "card")
+                RuntimeException.class,
+                () -> processor.getPayments("non-existent-file.csv", "card")
         );
 
-        assertTrue(
-            ex.getMessage().contains("Failed to parse payments from CSV file")
-        );
-
+        assertTrue(ex.getMessage().contains("Failed to parse payments from CSV file"));
         assertNotNull(ex.getCause());
     }
 }

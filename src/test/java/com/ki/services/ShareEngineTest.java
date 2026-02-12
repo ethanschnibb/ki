@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import com.ki.models.Payment;
 import com.ki.models.ShareOrder;
+import com.ki.models.Bank;
 
 import java.math.BigDecimal;
 
@@ -23,12 +24,13 @@ public class ShareEngineTest {
 
         assertEquals(2, result.length);
 
+        // Check shares for customer 123
         assertEquals(123, result[0].getCustomerId());
         assertEquals(3500, result[0].getShares());
 
+        // Check shares for customer 456
         assertEquals(456, result[1].getCustomerId());
         assertEquals(750, result[1].getShares());
-
     }
 
     @Test
@@ -48,14 +50,32 @@ public class ShareEngineTest {
 
         assertEquals(456, result[0].getCustomerId());
         assertEquals(4250, result[0].getShares());
-
     }
 
+    // ---------------------- TEST HELPERS ----------------------
+
+    /**
+     * Creates a simple Payment subclass for testing that
+     * returns exactly the amount and customerId we specify.
+     */
     private Payment createPayment(int customerId, int amount) {
-        Payment payment = new Payment();
-        payment.setCustomerId(customerId);
-        payment.setAmount(amount);
-        return payment;
+        return new TestPayment(customerId, amount);
     }
 
+    /**
+     * Minimal concrete Payment class for testing ShareEngine.
+     * Bypasses fees and any CSV parsing logic.
+     */
+    private static class TestPayment extends Payment {
+
+        public TestPayment(int customerId, int amount) {
+            setCustomerId(customerId);
+            setAmount(amount);
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return true;
+        }
+    }
 }

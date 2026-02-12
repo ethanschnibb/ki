@@ -5,11 +5,11 @@ import java.time.LocalDate;
 
 import com.ki.Config;
 
-public class Card extends Payment {
-    private int cardId;
-    private String status;
+public class Bank extends Payment {
 
-    public Card(String[] data) {
+    private int bankAccountId;
+
+    public Bank(String[] data) {
 
         this.setCustomerId(Integer.parseInt(data[0]));
 
@@ -20,15 +20,11 @@ public class Card extends Payment {
         this.setAmount(totalAmount - this.getFee());
         this.setDate(LocalDate.parse(data[1]));
 
-        this.cardId = Integer.parseInt(data[3]);
-        this.status = data[4];
+        this.bankAccountId = Integer.parseInt(data[3]);
     }
 
     @Override
     public boolean isSuccessful() {
-        return "processed".equals(status);
+        return true;
     }
-
-    public int getCardId() { return cardId; } 
-    public String getStatus() { return status; }
 }

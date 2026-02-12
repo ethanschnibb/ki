@@ -1,5 +1,6 @@
 package com.ki.services.adapters;
 
+import com.ki.models.Card;
 import com.ki.models.Payment;
 
 /**
@@ -23,6 +24,6 @@ public class CardPaymentAdapter implements PaymentAdapter {
     public Payment adapt(String[] line) {
 
         // No transformation required because card CSV aligns with Payment schema
-        return new Payment(line);
+        return new Card(line);
     }
 }
