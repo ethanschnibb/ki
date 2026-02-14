@@ -27,4 +27,12 @@ public class Bank extends Payment {
     public boolean isSuccessful() {
         return true;
     }
+
+    public int getBankAccountId() {
+        return bankAccountId;
+    }
+
+    public void setBankAccountId(int bankAccountId) {
+        this.bankAccountId = bankAccountId;
+    }
 }

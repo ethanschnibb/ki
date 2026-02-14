@@ -1,12 +1,13 @@
 package com.ki.models;
 
-import org.junit.Test;
-
 import java.time.LocalDate;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
-public class PaymentTest {
+public class CardPaymentTest {
 
     @Test
     public void testCardPaymentFromCsvRow() {
@@ -25,7 +26,7 @@ public class PaymentTest {
                 CARD_STATUS,
         };
 
-        Payment payment = new Card(data);
+        Card payment = new Card(data);
 
         assertEquals(CUSTOMER_ID, payment.getCustomerId());
         assertEquals(1960, payment.getAmount());
@@ -33,7 +34,7 @@ public class PaymentTest {
         assertEquals(LocalDate.of(2019, 2, 1), payment.getDate());
 
         // Downcast because base type is Payment
-        assertTrue(payment instanceof Card);
+        // assertTrue(payment instanceof Card);
 
         Card cardPayment = (Card) payment;
         assertEquals(CARD_ID, cardPayment.getCardId());

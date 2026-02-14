@@ -29,6 +29,19 @@ public class Card extends Payment {
         return "processed".equals(status);
     }
 
-    public int getCardId() { return cardId; } 
-    public String getStatus() { return status; }
+    public int getCardId() { 
+        return cardId; 
+    } 
+
+    public void setCardId(int cardId) {
+        this.cardId = cardId;
+    }
+
+    public String getStatus() { 
+        return status; 
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    } 
 }
