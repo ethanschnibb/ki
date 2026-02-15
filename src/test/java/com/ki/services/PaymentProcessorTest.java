@@ -1,20 +1,24 @@
 package com.ki.services;
 
-import com.ki.Fixture;
-import com.ki.models.Payment;
-import com.ki.models.Bank;
-import com.ki.models.Card;
-
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import com.ki.Fixture;
+import com.ki.models.Bank;
+import com.ki.models.Card;
+import com.ki.models.Payment;
 
 public class PaymentProcessorTest {
 
     // ------------------- CARD TESTS -------------------
 
     @Test
-    public void testGetPayments() {
+    public void testGetCardPayments() {
 
         String fixturePath = Fixture.getPath("card_payments_mixed.csv");
 
@@ -38,7 +42,7 @@ public class PaymentProcessorTest {
     }
 
     @Test
-    public void testGetPaymentsEmpty() {
+    public void testGetCardPaymentsEmpty() {
 
         String fixturePath = Fixture.getPath("card_payments_empty.csv");
 
@@ -49,7 +53,7 @@ public class PaymentProcessorTest {
     }
 
     @Test
-    public void testVerifyPayments() {
+    public void testVerifyCardPayments() {
 
         Payment payment1 = createCardPayment("processed");
         Payment payment2 = createCardPayment("declined");
