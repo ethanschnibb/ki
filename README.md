@@ -73,3 +73,20 @@ mvn test
 #### Notes
 
 The code base has been written to compile under Java 8 and upwards. Dependencies are managed via Maven, see the `pom.xml` file.
+
+## Implementation
+
+The payment source has been updated to support Bank payments.
+The user can now run the command: (after building the project with Maven)
+
+```
+java -jar target/ki-takehome-java-1.0-SNAPSHOT.jar bank_payments_example.csv bank 1.20
+```
+
+The PaymentProcessor getPayments method returns a Payment domain logic as before.
+A Bank class has been created to extend the Payment class, this was done as a generic Payment no longer exists as it has been split up into 'Card' and 'Bank'.
+Bank and Card have a shared sturcture and so inhereit from this Payment abstract class. The isSuccessful() method is required by both Card and Bank but has different implementations and so can be overridden by each.
+Using polymorphism allows us to keep the API for PaymentProcessor the same.
+Adapter interface and classes have been created to translate the differing Card and Bank CSV file formats into a Payment domain object, and this logic is removed from the PaymentProcessor class for separation of concerns and easier testing.
+Loggin API SLF4J introduced to improve logging (an essential need for production systems) and can be configured by adding the logback dependency and logback.xml file.
+Jacoco added to pom.xml file for test coverage of code. Good practice is to aim for over 80% coverage.

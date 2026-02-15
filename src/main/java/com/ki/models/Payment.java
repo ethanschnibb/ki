@@ -1,10 +1,6 @@
 package com.ki.models;
 
-import com.ki.Config;
-
-import java.math.BigDecimal;
 import java.time.LocalDate;
-
 
 public abstract class Payment {
 
