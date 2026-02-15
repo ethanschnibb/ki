@@ -1,15 +1,5 @@
 package com.ki;
 
-import com.ki.models.Payment;
-import com.ki.models.ShareOrder;
-import com.ki.services.PaymentProcessor;
-import com.ki.services.ShareEngine;
-import com.opencsv.CSVWriter;
-import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.inf.ArgumentParser;
-import net.sourceforge.argparse4j.inf.ArgumentParserException;
-import net.sourceforge.argparse4j.inf.Namespace;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -18,6 +8,17 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ki.models.Payment;
+import com.ki.models.ShareOrder;
+import com.ki.services.PaymentProcessor;
+import com.ki.services.ShareEngine;
+import com.opencsv.CSVWriter;
+
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
 
 public class LocalRunner {
 
@@ -55,7 +56,7 @@ public class LocalRunner {
 
         ArgumentParser parser = ArgumentParsers.newFor("LocalRunner").build();
         parser.addArgument("csv_path").help("Path to the payments CSV file");
-        parser.addArgument("source").help("The source of the payment, currently only 'card' is supported");
+        parser.addArgument("source").help("The source of the payment, currently only 'card' or 'bank' are supported");
         parser.addArgument("share_price").help("Share price to generate share orders for e.g. '1.30'");
         Namespace ns = null;
         try {
